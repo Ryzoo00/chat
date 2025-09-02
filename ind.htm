@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>V-iGent Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #e0e0e0;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        /* Particles Background - Enhanced for Dashboard */
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            transition: opacity 0.8s ease;
+        }
+        #particles-js.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        /* Dashboard Container */
+        .dashboard {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            transition: transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+            cursor: pointer;
+        }
+        .dashboard.active {
+            transform: translateY(-100vh);
+        }
+        /* Logo and Title */
+        .logo-container {
+            text-align: center;
+            margin-bottom: 2rem;
+            z-index: 3;
+            position: relative;
+        }
+        .logo {
+            font-size: 5rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #8e2de2, #4a00e0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 15px rgba(142, 45, 226, 0.5);
+            margin-bottom: 1rem;
+        }
+        /* Typing Effect */
+        .typing-container {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3;
+            position: relative;
+        }
+        .typing-text {
+            font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+            color: #a78bfa;
+            border-right: 3px solid #a78bfa;
+            padding-right: 5px;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { border-color: #a78bfa; }
+            51%, 100% { border-color: transparent; }
+        }
+        /* Navigation Hint */
+        .nav-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0.7;
+            animation: pulse 2s infinite;
+            z-index: 3;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 0.3; }
+        }
+        .nav-hint i {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        .nav-hint span {
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+        /* Chat Page Styles */
+        .chat-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        .chat-page.active {
+            transform: translateY(0);
+        }
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(15, 12, 41, 0.7);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 4;
+        }
+        .header-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #8e2de2, #4a00e0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .model-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .model-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        #modelSelect {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #e0e0e0;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        #modelSelect:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        #modelSelect option {
+            background: #302b63;
+            color: #e0e0e0;
+        }
+        .v-chat-btn {
+            background: linear-gradient(90deg, #8e2de2, #4a00e0);
+            border: none;
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(142, 45, 226, 0.3);
+        }
+        .v-chat-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(142, 45, 226, 0.4);
+        }
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            z-index: 4;
+            position: relative;
+            overflow: hidden;
+        }
+        .main-content #chat-particles-js {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        /* Chat Container */
+        #messages {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            padding: 1rem;
+            z-index: 2;
+            position: relative;
+            max-height: calc(100vh - 180px);
+        }
+        #messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        #messages::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        #messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+        #messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        /* Message Styles */
+        .msg {
+            margin-bottom: 1.5rem;
+            display: flex;
+            animation: fadeIn 0.3s ease-in-out;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .msg.user {
+            justify-content: flex-end;
+            margin-left: auto;
+            background: linear-gradient(135deg, #8e2de2, #4a00e0);
+            color: white;
+            padding: 1rem;
+            border-radius: 18px;
+            border-bottom-right-radius: 4px;
+        }
+        .msg.bot {
+            justify-content: flex-start;
+            margin-right: auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #e0e0e0;
+            padding: 1.2rem;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            line-height: 1.6;
+        }
+        /* Welcome Message */
+        .welcome-message {
+            text-align: center;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .welcome-message h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, #a78bfa, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .welcome-message p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            opacity: 0.8;
+        }
+        /* Search Bar - Updated to match image */
+        .search-container {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 600px;
+            background: rgba(30, 30, 40, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 4;
+        }
+        .search-icon {
+            color: #a78bfa;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .search-icon:hover {
+            color: #c084fc;
+            transform: scale(1.1);
+        }
+        #userInput {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #e0e0e0;
+            font-size: 1rem;
+            outline: none;
+            padding: 0.5rem 0;
+        }
+        #userInput::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .search-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .voice-btn {
+            color: #a78bfa;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: none;
+            border: none;
+        }
+        .voice-btn:hover {
+            color: #c084fc;
+            transform: scale(1.1);
+        }
+        .send-btn {
+            background: linear-gradient(90deg, #8e2de2, #4a00e0);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(142, 45, 226, 0.3);
+        }
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(142, 45, 226, 0.4);
+        }
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        /* Search Suggestions Dropdown */
+        .suggestions-dropdown {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            width: 100%;
+            background: rgba(30, 30, 40, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 10px;
+            padding: 0.8rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: none;
+            z-index: 5;
+        }
+        .suggestions-dropdown.active {
+            display: block;
+        }
+        .suggestion-item {
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 0.5rem;
+        }
+        .suggestion-item:last-child {
+            margin-bottom: 0;
+        }
+        .suggestion-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .suggestion-item.highlighted {
+            background: rgba(142, 45, 226, 0.2);
+        }
+        /* Deep Buttons */
+        .deep-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            justify-content: center;
+        }
+        .deep-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #e0e0e0;
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .deep-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        .deep-btn.active {
+            background: linear-gradient(90deg, #8e2de2, #4a00e0);
+            border-color: transparent;
+        }
+        /* Code Block Styling */
+        .code-block {
+            margin: 1rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            color: #a78bfa;
+        }
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #e0e0e0;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        pre {
+            margin: 0;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.4);
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        /* Enhanced Response Formatting - Professional AI Style */
+        .msg.bot .response-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0 0 1rem 0;
+            color: #ffffff;
+            line-height: 1.3;
+        }
+        
+        .msg.bot .response-intro {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        
+        .msg.bot .response-section {
+            margin-bottom: 1.2rem;
+        }
+        
+        .msg.bot .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #a78bfa;
+            margin: 1.5rem 0 0.8rem 0;
+            border-bottom: 1px solid rgba(167, 139, 250, 0.3);
+            padding-bottom: 0.3rem;
+            display: inline-block;
+        }
+        
+        .msg.bot .section-content {
+            margin-left: 0.5rem;
+        }
+        
+        .msg-bot .bullet-list, .msg.bot .numbered-list {
+            margin: 0.5rem 0 0 0;
+            padding-left: 0;
+            list-style-type: none;
+        }
+        
+        .msg.bot .bullet-list li, .msg.bot .numbered-list li {
+            margin-bottom: 0.6rem;
+            position: relative;
+            padding-left: 1.5rem;
+            line-height: 1.5;
+        }
+        
+        .msg.bot .bullet-list li::before {
+            content: "•";
+            color: #a78bfa;
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+        
+        .msg.bot .numbered-list li::before {
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+            color: #a78bfa;
+        }
+        
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            height: 20px;
+        }
+        
+        .typing-indicator span {
+            height: 10px;
+            width: 10px;
+            background-color: #a78bfa;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+            opacity: 0.4;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+        
+        /* Error Message */
+        .error-message {
+            color: #ff6b6b;
+            padding: 0.5rem;
+            border-radius: 4px;
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 3.5rem;
+            }
+            
+            .typing-text {
+                font-size: 1.8rem;
+            }
+            
+            .header {
+                padding: 1rem;
+            }
+            
+            .header-controls {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .model-selector {
+                width: 100%;
+            }
+            
+            #modelSelect {
+                width: 100%;
+                font-size: 0.8rem;
+            }
+            
+            .search-container {
+                width: 95%;
+                padding: 0.8rem;
+            }
+            
+            #controls {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .deep-buttons {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .msg {
+                max-width: 90%;
+            }
+            
+            .msg.bot .response-title {
+                font-size: 1.5rem;
+            }
+            
+            .msg.bot .section-title {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particles Background -->
+    <div id="particles-js"></div>
+    
+    <!-- Dashboard -->
+    <div class="dashboard" id="dashboard">
+        <div class="logo-container">
+            <h1 class="logo">V-igent</h1>
+            <div class="typing-container">
+                <div class="typing-text" id="typing-text"></div>
+            </div>
+        </div>
+        
+        <div class="nav-hint">
+            <i class="fas fa-chevron-up"></i>
+            <span>Click to enter</span>
+        </div>
+    </div>
+    
+    <!-- Chat Page -->
+    <div class="chat-page" id="chatPage">
+        <header class="header">
+            <div class="header-logo">V-iGent</div>
+            <div class="header-controls">
+                <div class="model-selector">
+                    <label for="modelSelect" class="model-label">Model:</label>
+                    <select id="modelSelect">
+                        <option value="qwen/qwen3-30b-a3b:free">Qwen3-30B-A3B</option>
+                        <option value="meta-llama/llama-3.3-70b-instruct:free">Llama-3.3-70B</option>
+                        <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                        <option value="openai/gpt-4">GPT-4</option>
+                    </select>
+                </div>
+                <button class="v-chat-btn">V-Chat</button>
+            </div>
+        </header>
+        
+        <main class="main-content">
+            <div id="chat-particles-js"></div>
+            <div id="messages">
+                <div class="welcome-message">
+                    <h2>Welcome to V-iGent</h2>
+                    <p>Your intelligent assistant for blogging, writing, summarizing, coding, and chatting. Experience the future of AI-powered conversations.</p>
+                </div>
+            </div>
+        </main>
+        
+        <div class="search-container">
+            <div class="suggestions-dropdown" id="suggestionsDropdown">
+                <div class="suggestion-item">Hai</div>
+                <div class="suggestion-item">HT</div>
+                <div class="suggestion-item">hair</div>
+            </div>
+            <i class="fas fa-plus search-icon"></i>
+            <input id="userInput" placeholder="Type your message..." />
+            <div class="search-actions">
+                <button class="voice-btn">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button class="send-btn" onclick="sendMessage()">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Particles.js Script -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <!-- Prism.js for Code Highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+    
+    <script>
+        // API Configuration
+        const API_KEY = "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";
+        const API_URL = "https://openrouter.ai/api/v1/chat/completions";
+        
+        // Particles Configuration
+        const particlesConfig = {
+            "particles": {
+                "number": {
+                    "value": 120,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": ["#a78bfa", "#c084fc", "#e9d5ff", "#f0abfc"]
+                },
+                "shape": {
+                    "type": ["circle", "triangle", "polygon"],
+                    "stroke": {
+                        "width": 0,
+                        "color": "#000000"
+                    },
+                    "polygon": {
+                        "nb_sides": 6
+                    }
+                },
+                "opacity": {
+                    "value": 0.6,
+                    "random": true,
+                    "anim": {
+                        "enable": true,
+                        "speed": 1.5,
+                        "opacity_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "size": {
+                    "value": 4,
+                    "random": true,
+                    "anim": {
+                        "enable": true,
+                        "speed": 3,
+                        "size_min": 0.3,
+                        "sync": false
+                    }
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 140,
+                    "color": "#a78bfa",
+                    "opacity": 0.5,
+                    "width": 1.2
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 2,
+                    "direction": "none",
+                    "random": true,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                    "attract": {
+                        "enable": true,
+                        "rotateX": 800,
+                        "rotateY": 1200
+                    }
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "grab"
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push"
+                    },
+                    "resize": true
+                },
+                "modes": {
+                    "grab": {
+                        "distance": 180,
+                        "line_linked": {
+                            "opacity": 1
+                        }
+                    },
+                    "push": {
+                        "particles_nb": 6
+                    }
+                }
+            },
+            "retina_detect": true
+        };
+        
+        // Initialize Particles for Dashboard
+        particlesJS('particles-js', particlesConfig);
+        
+        // Typing Effect
+        const words = ["Blogger", "Writer", "Summarizer", "Coder", "Summer", "V-Chat"];
+        let wordIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        const typingSpeed = 150;
+        const deletingSpeed = 100;
+        const pauseDuration = 4000;
+        
+        function typeEffect() {
+            const currentWord = words[wordIndex];
+            const typingElement = document.getElementById('typing-text');
+            
+            if (isDeleting) {
+                typingElement.textContent = currentWord.substring(0, charIndex - 1);
+                charIndex--;
+                
+                if (charIndex === 0) {
+                    isDeleting = false;
+                    wordIndex = (wordIndex + 1) % words.length;
+                    setTimeout(typeEffect, 500);
+                    return;
+                }
+            } else {
+                typingElement.textContent = currentWord.substring(0, charIndex + 1);
+                charIndex++;
+                
+                if (charIndex === currentWord.length) {
+                    isDeleting = true;
+                    setTimeout(typeEffect, pauseDuration);
+                    return;
+                }
+            }
+            
+            setTimeout(typeEffect, isDeleting ? deletingSpeed : typingSpeed);
+        }
+        
+        // Start typing effect
+        typeEffect();
+        
+        // Dashboard Click Event
+        document.getElementById('dashboard').addEventListener('click', function() {
+            this.classList.add('active');
+            
+            // Hide particles when transitioning to chat page
+            setTimeout(() => {
+                document.getElementById('particles-js').classList.add('hidden');
+                document.getElementById('chatPage').classList.add('active');
+                
+                // Initialize particles for chat page
+                particlesJS('chat-particles-js', particlesConfig);
+            }, 800);
+        });
+        
+        // Model Selection Change Event
+        document.getElementById('modelSelect').addEventListener('change', function() {
+            console.log('Selected model:', this.value);
+        });
+        
+        // Event listener for Enter key on input
+        document.getElementById('userInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Search suggestions functionality
+        const userInput = document.getElementById('userInput');
+        const suggestionsDropdown = document.getElementById('suggestionsDropdown');
+        const suggestionItems = document.querySelectorAll('.suggestion-item');
+        
+        userInput.addEventListener('input', function() {
+            if (this.value.length > 0) {
+                suggestionsDropdown.classList.add('active');
+            } else {
+                suggestionsDropdown.classList.remove('active');
+            }
+        });
+        
+        // Close suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-container')) {
+                suggestionsDropdown.classList.remove('active');
+            }
+        });
+        
+        // Handle suggestion clicks
+        suggestionItems.forEach(item => {
+            item.addEventListener('click', function() {
+                userInput.value = this.textContent;
+                suggestionsDropdown.classList.remove('active');
+                userInput.focus();
+            });
+        });
+        
+        // Voice input functionality (simulated)
+        const voiceBtn = document.querySelector('.voice-btn');
+        voiceBtn.addEventListener('click', function() {
+            // In a real implementation, this would use the Web Speech API
+            alert('Voice input would be activated here in a real implementation');
+        });
+        
+        // Format AI response to match professional style
+        function formatResponse(text) {
+            // Create a structured HTML response
+            let html = '';
+            
+            // Split the text into lines
+            const lines = text.split('\n');
+            
+            // Process each line
+            let currentSection = null;
+            let inList = false;
+            let listType = null; // 'bullet' or 'numbered'
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                
+                if (line === '') continue;
+                
+                // Check if it's a section title (ends with colon)
+                if (line.endsWith(':')) {
+                    // Close previous section if exists
+                    if (currentSection) {
+                        html += '</div></div>';
+                    }
+                    
+                    // Start new section
+                    currentSection = line;
+                    html += `<div class="response-section">
+                        <div class="section-title">${line}</div>
+                        <div class="section-content">`;
+                    inList = false;
+                } 
+                // Check if it's a numbered list item (starts with number and period)
+                else if (/^\d+\./.test(line)) {
+                    if (!inList || listType !== 'numbered') {
+                        if (inList) html += '</ul>';
+                        html += '<ol class="numbered-list">';
+                        inList = true;
+                        listType = 'numbered';
+                    }
+                    
+                    // Remove the number and period for the list item
+                    const itemText = line.replace(/^\d+\.\s*/, '');
+                    html += `<li>${itemText}</li>`;
+                }
+                // Check if it's a bullet point (starts with hyphen)
+                else if (line.startsWith('-')) {
+                    if (!inList || listType !== 'bullet') {
+                        if (inList) html += '</ol>';
+                        html += '<ul class="bullet-list">';
+                        inList = true;
+                        listType = 'bullet';
+                    }
+                    
+                    // Remove the hyphen for the list item
+                    const itemText = line.replace(/^-\s*/, '');
+                    html += `<li>${itemText}</li>`;
+                }
+                // Regular paragraph
+                else {
+                    // Close list if we were in one
+                    if (inList) {
+                        if (listType === 'bullet') {
+                            html += '</ul>';
+                        } else {
+                            html += '</ol>';
+                        }
+                        inList = false;
+                    }
+                    
+                    // Check if this is the first line (title)
+                    if (i === 0) {
+                        html += `<div class="response-title">${line}</div>`;
+                    } else if (!currentSection) {
+                        // This is the introductory paragraph
+                        html += `<div class="response-intro">${line}</div>`;
+                    } else {
+                        html += `<p>${line}</p>`;
+                    }
+                }
+            }
+            
+            // Close any open tags
+            if (inList) {
+                if (listType === 'bullet') {
+                    html += '</ul>';
+                } else {
+                    html += '</ol>';
+                }
+            }
+            
+            if (currentSection) {
+                html += '</div></div>';
+            }
+            
+            return html;
+        }
+        
+        // Copy code to clipboard
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-block');
+            const codeElement = codeBlock.querySelector('code');
+            const text = codeElement.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+        
+        // Send Message Function
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const modelSelect = document.getElementById('modelSelect');
+            const text = input.value.trim();
+            
+            if (text === '') return;
+            
+            // Remove welcome message if it exists
+            const welcomeMessage = document.querySelector('.welcome-message');
+            if (welcomeMessage) {
+                welcomeMessage.remove();
+            }
+            
+            // Add user message
+            const messagesContainer = document.getElementById('messages');
+            const userMessage = document.createElement('div');
+            userMessage.className = 'msg user';
+            userMessage.textContent = text;
+            messagesContainer.appendChild(userMessage);
+            
+            // Clear input and hide suggestions
+            input.value = '';
+            suggestionsDropdown.classList.remove('active');
+            
+            // Add bot message with loading indicator
+            const botMessage = document.createElement('div');
+            botMessage.className = 'msg bot';
+            botMessage.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+            messagesContainer.appendChild(botMessage);
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${API_KEY}`,
+                        "Content-Type": "application/json",
+                        "HTTP-Referer": "https://your-website.com", // Optional, for inclusion on OpenRouter leaderboard
+                        "X-Title": "V-iGent Dashboard" // Optional, for inclusion on OpenRouter leaderboard
+                    },
+                    body: JSON.stringify({
+                        model: modelSelect.value,
+                        messages: [
+                            { 
+                                role: "system", 
+                                content: "You are a professional AI assistant that provides well-structured, informative responses. When providing biographical information, format your response exactly as follows:\n\n1. Start with the person's name as a title\n2. Follow with a brief introductory paragraph about the person\n3. Use section headings with colons (e.g., \"Basic Information:\", \"Education:\", etc.)\n4. Under each section, use bullet points (starting with -) for basic information and numbered lists (starting with 1., 2., etc.) for sequential information\n5. Ensure the response is comprehensive, well-organized, and easy to read\n\nYour response should be formatted exactly like this example:\n\nElon Musk is one of the world's most influential entrepreneurs, engineers, and innovators. He is widely known for founding and leading multiple groundbreaking companies in technology, space, and energy.\nBasic Information:\n- Full Name: Elon Reeve Musk\n- Born: June 28, 1971, in Pretoria, South Africa\n- Citizenship: South African, Canadian, American\n- Net Worth: Often among the richest people in the world\nEducation:\n- Studied at University of Pretoria briefly\n- Attended Queen's University in Canada\n- Transferred to University of Pennsylvania, earned degrees in Physics and Economics\n- Started a PhD at Stanford but dropped out after 2 days to pursue business\nMajor Companies and Achievements:\n1. Zip2 (1996–1999) – Co-founded online city guide, sold to Compaq for $307M\n2. X.com / PayPal (1999–2002) – Online payments company, later became PayPal, sold to eBay for $1.5B\n3. SpaceX (2002–present) – Founded to make space travel cheaper; created Falcon 9, Starship, and Starlink\n4. Tesla, Inc. (2004–present) – CEO; produces electric cars and clean energy solutions\n5. SolarCity (2006–2016) – Co-founded, later merged with Tesla Energy\n6. Neuralink (2016–present) – Developing brain–computer interfaces\n7. The Boring Company (2016–present) – Focused on tunnels and transport\n8. Twitter / X (2022–present) – Acquired Twitter for $44B, renamed to X\nVision and Philosophy:\n- Believes humanity must become multi-planetary\n- Advocates for renewable energy and sustainable future\n- Supports AI development but warns about its risks\nPersonal Life:\n- Married multiple times, has children with Justine Musk and musician Grimes\n- Known for outspoken and controversial presence on Twitter/X\nAwards and Recognition:\n- Time Person of the Year (2021)\n- Listed among Time's 100 Most Influential People multiple times\n- Considered both a visionary innovator and a controversial figure" 
+                            },
+                            { role: "user", content: text }
+                        ]
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(data.error.message || 'Unknown error occurred');
+                }
+                
+                const botResponse = data.choices[0].message.content;
+                
+                // Format the response using our custom formatter
+                const formattedResponse = formatResponse(botResponse);
+                
+                // Update bot message
+                botMessage.innerHTML = formattedResponse;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                botMessage.innerHTML = `<div class="error-message">Error: ${error.message}</div>`;
+            }
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>
